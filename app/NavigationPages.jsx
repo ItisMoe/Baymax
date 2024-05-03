@@ -5,6 +5,7 @@ import Home from './Home';
 import Consult from './WellCheck';
 import Medicine from './Medicine';
 import More from './More';
+import Signup from './Signup';
 
 const NavigationPages = () => {
 
