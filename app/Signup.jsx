@@ -97,7 +97,10 @@ class Signup extends Component {
     console.log(result);
 
     if (!result.canceled) {
-      this.setState({ image: result.assets[0].uri });
+      //this.setState({ image: result.assets[0].uri });
+      const imageBase64 = `data:${result.type};base64,${result.base64}`;
+      this.setState({ image: imageBase64 });
+
     }
   };
 
