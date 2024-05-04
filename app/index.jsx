@@ -1,15 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import NavigationPages from "./NavigationPages";
-import { ApplicationProvider, Layout, Text } from '@ui-kitten/components';
-import * as eva from '@eva-design/eva';
+import { ApplicationProvider } from "@ui-kitten/components";
+import * as eva from "@eva-design/eva";
+import { Provider } from "react-redux";
+import App from "./App";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { storeData } from "./storage";
 
 
-const App = () => {
-    return (
-        <ApplicationProvider {...eva} theme={eva.light}>
-            <NavigationPages/>
-        </ApplicationProvider>
-    );
+const Main = () => {
+    // useEffect(() => {
+    //     storeData(-1);
+    // },[]);
+  return (
+      <App/>
+  );
 };
 
-export default App;
+export default Main;
+
