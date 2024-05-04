@@ -32,6 +32,8 @@ import { Picker } from "@react-native-picker/picker";
 import { router } from "expo-router";
 import CryptoJS from "crypto-js";
 import { storeData } from "./storage";
+import axios from 'axios';
+
 
 
 const stepTypes = _.map(Wizard.States, (state) => {
@@ -235,6 +237,23 @@ class Signup extends Component {
       />
     );
   };
+
+   getAllPatients = async () => {
+    try {
+      const response = await axios.get('http://your-backend-domain/api/patients');
+  
+      if (response.status === 200) {
+        console.log('Patients:', response.data);
+        // Handle the list of patients returned by the server
+      } else {
+        throw new Error('Failed to fetch patients');
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+      // Handle error
+    }
+  };
+  
   renderSubmitButton = () => {
     const nextLabel = "Finish Registration";
 
@@ -244,8 +263,11 @@ class Signup extends Component {
         marginT-10
         label={nextLabel}
         onPress={() => {
-          storeData(0);
+
           //TODO handlePatientRegistrationForm(this.state.fullName,this.state.email,CryptoJS.SHA256(this.state.password).toString(CryptoJS.enc.Hex),this.state.image,this.state.sex,this.state.age,this.state.nationality,this.state.address,this.state.phoneNumber,this.state.height,this.state.weight,this.state.bloodType,this.state.activityLevel,this.state.isSmoking,this.state.diseaseList,this.state.vaccineList,this.state.surgeryList,this.state.familyDiseaseList);
+
+          this.getAllPatients();
+          storeData(0);
           router.push("/")
         }
       }
