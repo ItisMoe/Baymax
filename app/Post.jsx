@@ -5,38 +5,14 @@ import { View } from "react-native-ui-lib";
 import { router } from "expo-router";
 import PostsScreen from "./PostsScreen";
 
-const Post = () => {
+
+const Post = ({ route, navigation }) => {
   // Extract the parameters passed via the navigation route
-    const [title, setTitle] = useState(null);
-  const [body, setBody] = useState(null);
-  const [date, setDate] = useState(null);
-  const [image, setImage] = useState(null);
-  const [creatorName, setCreatorName] = useState(null);
 
-  useEffect(() => {
-    const fetchAuthDetails = async () => {
-      const title = await retrievePostTitle();
-      const body = await retrievePostBody();
-    const date = await retrievePostDate();
-      const image = await retrievePostImage();
-      const creatorName = await retrievePostCreatorName();
-      setTitle(title);
-      setBody(body);
-      setDate(date);
-      setImage(image);
-      setCreatorName(creatorName);
-    };
-
-    fetchAuthDetails();
-  }, []);
+  const { title, image, body, date, creatorName } = route.params;
 
   return (
     <ScrollView style={styles.container}>
-
-      <Text style={{fontSize:20,fontWeight:600,color:'grey',marginBottom:20}} onPress={()=>{
-        router.push("./");
-      }}> Back</Text>
-
       <Text style={styles.title}>{title}</Text>
       <Image source={{ uri: image }} style={styles.image} />
       <Text style={styles.metadata}>

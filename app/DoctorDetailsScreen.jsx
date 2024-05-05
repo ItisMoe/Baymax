@@ -56,7 +56,7 @@ const DoctorDetailsScreen = ({ route, navigation }) => {
               onPress={() =>
                 appointment.available &&
                 navigation.navigate("Booking", {
-                  doctorId,
+                  doctorId: doctorId,
                   time: appointment.time,
                   date: appointment.date,
                 })

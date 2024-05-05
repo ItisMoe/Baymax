@@ -10,8 +10,6 @@ import {
 import { Card, SearchBar } from "react-native-elements";
 import { ScrollView } from "react-native";
 import { router } from "expo-router";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { useNavigate } from "react-router-dom";
 import { storePostData } from "./storage";
 
 // Example JSON data for articles
@@ -43,7 +41,7 @@ const articlesData = [
   // Add more articles as needed
 ];
 
-const PostsScreen = () => {
+const PostsScreen = ({navigation}) => {
 
   const [search, setSearch] = useState("");
   const [filteredArticles, setFilteredArticles] = useState(articlesData);
@@ -59,16 +57,13 @@ const PostsScreen = () => {
   const renderItem = ({ item }) => (
     <TouchableOpacity
       onPress={() => {
-        setTimeout(() => {
-          storePostData(
-            item.title,
-            item.body,
-            item.creatorName,
-            item.date,
-            item.image
-          );
-        }, 2000);
-        router.push("./Post");
+        navigation.navigate("Post", {
+          title: item.title,
+          image: item.image,
+          body: item.body,
+          date: item.date,
+          creatorName: item.creatorName,
+        });
       }}
     >
       <Card containerStyle={styles.cardContainer}>
