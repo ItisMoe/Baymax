@@ -26,6 +26,9 @@ import {
 import { TextInput } from "react-native-paper";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from 'expo-file-system';
+
+
 import { Avatar } from "react-native-paper";
 import { RadioButton } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
@@ -86,23 +89,80 @@ class Signup extends Component {
       alert("Sorry, we need camera roll permissions to make this work!");
     }
   }
+  // pickImage = async () => {
+  //   let result = await ImagePicker.launchImageLibraryAsync({
+  //     mediaTypes: ImagePicker.MediaTypeOptions.All,
+  //     allowsEditing: true,
+  //     aspect: [4, 3],
+  //     quality: 1,
+  //   });
+  
+  //   console.log("result"+ result);
+  
+  //   if (!result.cancelled && result.uri) {
+  //     try {
+  //       const fileSize = await FileSystem.getInfoAsync(result.uri);
+  //       if (fileSize.size <= 4194304) { // 4 MB in bytes
+  //         const base64Image = await FileSystem.readAsStringAsync(result.uri, {
+  //           encoding: FileSystem.EncodingType.Base64,
+  //         });
+  //         console.log("base64:" + base64Image);
+  //         this.setState({ image: base64Image });
+  //       } else {
+  //         console.log("Image is too large. Must be less than 4 MB.");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error reading file: ", error);
+  //     }
+  //   } else {
+  //     console.log("No image picked or invalid URI.");
+  //   }
+  // };
+
   pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    console.log(result);
-
-    if (!result.canceled) {
-      //this.setState({ image: result.assets[0].uri });
-      const imageBase64 = `data:${result.type};base64,${result.base64}`;
-      this.setState({ image: imageBase64 });
-
+    try {
+      // Requesting permissions to access the camera roll
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Sorry, we need camera roll permissions to make this work!');
+        return;
+      }
+  
+      // Launching the image picker
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+  
+      // Handling the result when the image picker is not cancelled
+      if (!result.cancelled) {
+        // Getting image information including file size
+        const fileInfo = await FileSystem.getInfoAsync(result.uri);
+        console.log('File Info:', fileInfo);
+  
+        // Check if the image size exceeds 4 MB
+        if (fileInfo.size > 4194304) {
+          alert('Image is too large. Must be less than 4 MB.');
+          return;
+        }
+  
+        // Reading the image as a Base64-encoded string
+        const base64Image = await FileSystem.readAsStringAsync(result.uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+  
+        // Updating the state with the Base64 image
+        this.setState({ image: `data:image/jpeg;base64,${base64Image}` });
+      }
+    } catch (error) {
+      // Logging any errors that occur during the image picking process
+      console.error('Error picking image:', error);
+      alert('Failed to pick image. Please try again.');
     }
   };
+  
 
   componentDidMount() {
     this.requestCameraPermission();
@@ -243,7 +303,7 @@ class Signup extends Component {
 
    getAllPatients = async () => {
     try {
-      const response = await axios.get('http://your-backend-domain/api/patients');
+      const response = await axios.get('http://localhost:3000/api/patients');
   
       if (response.status === 200) {
         console.log('Patients:', response.data);

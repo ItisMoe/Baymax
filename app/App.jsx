@@ -7,6 +7,7 @@ import { retrieveAccountType, retrieveIsLogged } from "./storage";
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(null);
+  
   const [accountType, setAccountType] = useState(null);
 
   useEffect(() => {
@@ -22,7 +23,10 @@ const App = () => {
   }, []);
 
   const componentToRender = () => {
-    if (isLoggedIn === "true" && accountType === "Patient")
+    //isLoggedIn="false";
+    //if (isLoggedIn === "true" && accountType === "Patient")
+    if (!isLoggedIn === "true" && accountType === "Patient")
+
       return <NavigationPages />;
     else if (isLoggedIn === "true" && accountType === "Doctor")
       return <DocNavigationPages />;
