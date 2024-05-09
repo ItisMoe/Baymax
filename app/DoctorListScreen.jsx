@@ -86,7 +86,7 @@ const DoctorListScreen = ({ route, navigation }) => {
         data={filteredDoctors}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        numColumns={2} // Set to 2 for a grid layout
+        numColumns={2}
       />
     </View>
   );

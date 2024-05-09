@@ -34,6 +34,7 @@ const DoctorDetailsScreen = ({ route, navigation }) => {
         "https://media.istockphoto.com/id/1342708859/photo/portrait-of-a-male-doctor.jpg?s=612x612&w=0&k=20&c=7ojvfSnLNx73sR1xXTReBrIXJOZPpSNFZ3E9CodsfQU=",
     };
     setDoctor(doctorDetails);
+    console.log(doctorId+" this is me in the new work load")
     setAppointments(appointmentsData);
   }, [doctorId]);
 

@@ -8,6 +8,7 @@ import More from "./More";
 import Signup from "./Signup";
 import Login from "./Login";
 import StarterPage from './StarterPage'
+import Diagnose from "./Diagnose";
 
 const NavigationPages = () => {
   const [index, setIndex] = React.useState(0);
@@ -47,7 +48,7 @@ const NavigationPages = () => {
   const renderScene = BottomNavigation.SceneMap({
     Home: Home,
     Schedule: Appointments,
-    Consult: Consult,
+    Consult: Diagnose,
     Store: Medicine,
     More: More,
   });
