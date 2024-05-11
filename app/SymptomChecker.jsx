@@ -7,9 +7,12 @@ import {
   StyleSheet,
   Animated,
 } from "react-native";
+import {
+  Button,
+} from "react-native-ui-lib";
 import { FontAwesome5 } from "@expo/vector-icons";
 import Collapsible from "react-native-collapsible";
-import { LinearGradient } from "expo-linear-gradient";
+// import { LinearGradient } from "expo-linear-gradient";
 
 const symptomsByCategory = {
   Respiratory: [
@@ -159,6 +162,7 @@ const categoryIcons = {
 
 const SymptomChecker = ({navigation}) => {
   const [selectedSymptoms, setSelectedSymptoms] = useState({});
+  const [disable,setDisable] = useState(true);
   const [collapsed, setCollapsed] = useState(
     Object.keys(symptomsByCategory).reduce(
       (acc, key) => ({ ...acc, [key]: true }),
@@ -168,7 +172,9 @@ const SymptomChecker = ({navigation}) => {
 
   const toggleSymptom = (symptom) => {
     setSelectedSymptoms((prev) => ({ ...prev, [symptom]: !prev[symptom] }));
-  };
+    if(selectedSymptoms.length!=0) setDisable(false);
+};
+
 
   const toggleCollapse = (category) => {
     setCollapsed((prev) => ({ ...prev, [category]: !prev[category] }));
@@ -214,13 +220,18 @@ const SymptomChecker = ({navigation}) => {
           </Collapsible>
         </View>
       ))}
-      <LinearGradient colors={["#6a11cb", "#2575fc"]} style={styles.button}>
-        <TouchableOpacity onPress={()=>{  navigation.navigate("SymptomCheckerOutput", {
-          selectedSymptoms: selectedSymptoms,
-        });}}>
-          <Text style={styles.buttonText}>Submit</Text>
-        </TouchableOpacity>
-      </LinearGradient>
+      <Button
+        label={"Diagnose"}
+        marginT-10
+        disabled={disable}
+        style={styles.button}
+        backgroundColor={disable ? "grey" : "black"}
+        onPress={() => {
+          navigation.navigate("SymptomCheckerOutput", {
+            selectedSymptoms: selectedSymptoms,
+          });
+        }}
+      />
     </ScrollView>
   );
 };
@@ -265,7 +276,7 @@ const styles = StyleSheet.create({
   },
   symptomText: {
     fontSize: 20,
-    fontWeight:'bold',
+    fontWeight: "bold",
   },
   checkboxUnchecked: {
     width: 24,
@@ -281,18 +292,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#4CAF50",
   },
   button: {
-    borderRadius: 25,
-    paddingVertical: 15,
+    paddingVertical: 12,
     paddingHorizontal: 20,
-    marginTop: 20,
-    marginBottom:40,
+    borderRadius: 50,
+    marginVertical:40,
     alignItems: "center",
-  },
-  buttonText: {
-    textAlign: "center",
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    marginBottom:40,
+    elevation: 5,
   },
 });
 

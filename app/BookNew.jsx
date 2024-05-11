@@ -6,7 +6,6 @@ import BookingScreen from "./BookingScreen";
 import DoctorDetailsScreen from "./DoctorDetailsScreen";
 import DoctorListScreen from "./DoctorListScreen";
 import SpecialityScreen from "./SpecialityScreen";
-import DoctorNavigator from "./DoctorNavigator";
 
 const Stack = createNativeStackNavigator();
 
@@ -18,7 +17,6 @@ const BookNew = () => {
         <Stack.Screen name="DoctorList" component={DoctorListScreen} />
         <Stack.Screen name="DoctorDetails" component={DoctorDetailsScreen} />
         <Stack.Screen name="Booking" component={BookingScreen} />
-        <Stack.Screen name="DoctorNavigator" component={DoctorNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
   );

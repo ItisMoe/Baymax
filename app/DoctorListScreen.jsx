@@ -98,19 +98,18 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   searchBar: {
-    height: 40,
+    height: 50,
     marginBottom: 10,
-    borderWidth: 1,
     padding: 10,
     borderRadius: 10,
+    backgroundColor:'white'
   },
   card: {
     flex: 1,
     padding: 10,
     margin: 5,
-    borderWidth:0.5,
     backgroundColor: "#ffffff",
-    borderRadius: 10,
+    borderRadius: 15,
   },
   image: {
     width: "100%",

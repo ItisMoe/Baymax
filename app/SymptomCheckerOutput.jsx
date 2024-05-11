@@ -3,14 +3,13 @@ import { router } from "expo-router";
 import {
   View,
   Text,
-  ScrollView,
   StyleSheet,
   ActivityIndicator,
   FlatList,
   TouchableOpacity,
-  Image
+  Image,
+  ScrollView,
 } from "react-native";
-import SymptomChecker from "./SymptomChecker";
 
 const SymptomCheckerOutput = ({ route }) => {
   const [isLoading, setLoading] = useState(true);
@@ -25,6 +24,7 @@ const SymptomCheckerOutput = ({ route }) => {
     },
     doctors: [
       {
+        id: 1,
         name: "Dr. Sarah Lee",
         specialty: "Endocrinologist",
         image:
@@ -32,6 +32,7 @@ const SymptomCheckerOutput = ({ route }) => {
         contactInfo: "555-0100",
       },
       {
+        id: 2,
         name: "Dr. John Doe",
         specialty: "General Practitioner",
         image:
@@ -39,6 +40,7 @@ const SymptomCheckerOutput = ({ route }) => {
         contactInfo: "555-0102",
       },
       {
+        id: 3,
         name: "Dr. Jane Smith",
         specialty: "Dietician",
         image:
@@ -49,42 +51,32 @@ const SymptomCheckerOutput = ({ route }) => {
   };
 
   useEffect(() => {
-    // fetch("http://API_IP_ADDRESS", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({ symptoms: route.params.selectedSymptoms }),
     console.log(selectedSymptoms);
     setDisease(json.disease);
     setDoctors(json.doctors);
     setLoading(false);
-
-    // })
-    //   .then((response) => response.json())
-    //   .then((json) => {
-    //     setDiseases(json.diseases);
-    //     setDoctors(json.doctors);
-    //     setLoading(false);
-    //   })
-    //   .catch((error) => console.error(error))
-    //   .finally(() => setLoading(false));
   }, []);
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() =>
-        router.push({ pathname: `./DoctorNavigator`, params: item.id })
-      }
-    >
-      <Image source={{ uri: item.image }} style={styles.image} />
-      <Text style={styles.name}>{item.name}</Text>
-      <Text>{item.specialty}</Text>
-      <Text style={styles.location}>{item.contactInfo}</Text>
-    </TouchableOpacity>
-  );
+  const renderItem = ({ item }) => {
+    console.log(`Pushing doctor ID: ${item.id}`); // Log the ID being pushed
 
+    return (
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() =>
+          router.push({
+            pathname: `./${item.id}`,
+            query: { doctorId: item.id },
+          })
+        }
+      >
+        <Image source={{ uri: item.image }} style={styles.image} />
+        <Text style={styles.name}>{item.name}</Text>
+        <Text>{item.specialty}</Text>
+        <Text style={styles.location}>{item.contactInfo}</Text>
+      </TouchableOpacity>
+    );
+  };
   return (
     <View style={styles.container}>
       {isLoading ? (
@@ -98,14 +90,12 @@ const SymptomCheckerOutput = ({ route }) => {
           <View style={styles.diseaseContainer}>
             <Text style={styles.suggested}>Suggested Doctors</Text>
           </View>
-          <ScrollView horizontal>
-            <FlatList
-              data={doctors}
-              horizontal
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={renderItem}
-            />
-          </ScrollView>
+          <FlatList
+            data={doctors}
+            horizontal
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={renderItem}
+          />
         </ScrollView>
       )}
     </View>
@@ -128,13 +118,12 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     margin: 5,
-    // borderWidth: 0.5,
     backgroundColor: "#ffffff",
     borderRadius: 10,
   },
   image: {
     width: "100%",
-    height: 120, // Adjust based on your layout preference
+    height: 120,
     borderRadius: 10,
   },
   name: {
