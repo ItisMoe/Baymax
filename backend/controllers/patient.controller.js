@@ -2,6 +2,7 @@ const Patient = require("../models/Patient.model");
 
 const bcrypt = require("bcrypt");
 
+const jwt = require("jsonwebtoken");
 
 const getAllPatients = async (req, res) => {
     try {
@@ -15,20 +16,8 @@ const getAllPatients = async (req, res) => {
 
   const getPatient = async (req, res) => {
     try {
-      const { id } = req.params;
-      const patient = await Patient.findById(id);
-      res.status(200).json(patient);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  };
-
-  const addPatient1 = async (req, res) => {
-    try {
-      //hashing the password for the patient
-
-      
-      const patient = await Patient.create(req.body);
+      const { email } = req.params;
+      const patient = await Patient.findById(email);
       res.status(200).json(patient);
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -36,68 +25,41 @@ const getAllPatients = async (req, res) => {
   };
 
 
-  //const addPatient= async(req,res) =>{
 
-      // hash the password
-  // bcrypt
-   
-  // .hash(req.body.address, 10)
-  // .then((hashedPassword) => {
-  //   // create a new user instance and collect the data
-  //   const patient =  Patient.create(req.body)
 
-      // return success if the new user is added to the database successfully
-      // .then((result) => {
-
-   //   try{
-     // const hashedAddress = await bcrypt.hash(req.body.address, 10);
-
-      // Create a new patient instance with hashed address
-      //const patient = await Patient.create({ ...req.body, address: hashedAddress });
-  
-        //res.status(201).send({
-          //message: "Patient Created Successfully",
-          //result,
-        //});
-      //}
-      // catch error if the new user wasn't added successfully to the database
-      //.catch((error) => {
-        //res.status(500).send({
-         // message: "Error creating patient::"+error,
-          //error,
-        //});
-      //});
-  //})
-  // catch error if the password hash isn't successful
-  //.catch((e) => {
-    //res.status(500).send({
-      //message: "Password was not hashed successfully",
-      //e,
-    //});
-  //});
 
 
   const addPatient = async (req, res) => {
     try {
       const hashedPassword = await bcrypt.hash(req.body.password, 10);
   
-      // Create a new patient instance with hashed address
+      // Check if patient with the provided email already exists
+      const existingPatient = await Patient.findOne({ email: req.body.email });
+      if (existingPatient) {
+        console.log("Patient email already exists");
+        return res.status(400).send({
+          message: "Patient email already exists",
+        });
+      }
+  
+      // Create a new patient instance with hashed password
       const patient = await Patient.create({ ...req.body, password: hashedPassword });
   
       // Send success response
       res.status(201).send({
         message: "Patient Created Successfully",
-        result: patient, // Assuming you want to send the created patient object
+        result: patient,
       });
     } catch (error) {
-      // Handle errors
-      console.error(error);
+      console
+      // Handle unexpected errors
       res.status(500).send({
         message: "Error creating patient",
-        error: error.message, // Send error message for better understanding
+        error: error.message,
       });
     }
   };
+  
   
   
 
@@ -134,66 +96,50 @@ const getAllPatients = async (req, res) => {
     }
   };
   
-  const login= async (request, response) => {
-     // check if email exists
-     const hashedPassword = await bcrypt.hash(request.body.password, 10);
-
-  Patient.findOne({ userName: request.body.userName })
-
-  // if email exists
-  .then((user) => {
-    // compare the password entered and the hashed password found
-    
-console.log(hashedPassword);
-console.log(user.password);
-    bcrypt
-      .compare(hashedPassword, user.password)
-      
-
-      // if the passwords match
-      .then((passwordCheck) => {
-
-        // check if password matches
-        if(!passwordCheck) {
-          return response.status(400).send({
-            message: "Passwords does not match",
-            error,
-          });
-        }
-
-        //   create JWT token
-        const token = jwt.sign(
-          {
-            userIdMongo: user.patient_ID
-          },
-          "RANDOM-TOKEN",
-          { expiresIn: "24h" }
-        );
-
-        //   return success response
-        response.status(200).send({
-          message: "Login Successful",
-          email: user.email,
-          token,
+  const login = async (request, response) => {
+    try {
+      console.log("request sent to me");
+      // Check if email exists
+      const user = await Patient.findOne({ email: request.body.email });
+      if (!user) {
+        console.log("email not found")
+        return response.status(404).send({
+          message: "Username not found",
         });
-      })
-      // catch error if password does not match
-      .catch((error) => {
-        response.status(400).send({
-          message: "Passwords does not match",
-          error,
+      }
+  
+      // Compare the entered password and the hashed password
+      const passwordCheck = await bcrypt.compare(request.body.password, user.password);
+      if (!passwordCheck) {
+        return response.status(400).send({
+          message: "Passwords do not match",
         });
+      }
+  
+      // Create JWT token
+      const token = jwt.sign(
+        {
+          userIdMongo: user._id, // Assuming MongoDB's default ID field
+        },
+        "RANDOM-TOKEN",
+        { expiresIn: "24h" }
+      );
+  
+      // Return success response
+      response.status(200).send({
+        message: "Login Successful",
+        email: user.email,
+        token,
       });
-  })
-  // catch error if email does not exist
-  .catch((e) => {
-    response.status(404).send({
-      message: "Username not found",
-      e,
-    });
-  });
-  }
-
+    } catch (error) {
+      console.error(error);
+      response.status(500).send({
+        message: "Error during login",
+        error: error.message,
+      });
+    }
+  };
+  
   module.exports = {
     login,
     getPatient,

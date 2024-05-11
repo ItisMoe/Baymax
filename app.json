@@ -24,7 +24,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.moeitis.Baymax"
+      "package": "com.moeitis.Baymax",
+      "permissions": ["INTERNET"] 
     },
     "web": {
       "favicon": "./assets/adaptive-icon.png",

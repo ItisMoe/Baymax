@@ -26,16 +26,15 @@ import {
 import { TextInput } from "react-native-paper";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from 'expo-file-system';
-
-
 import { Avatar } from "react-native-paper";
 import { RadioButton } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
 import { router } from "expo-router";
 import CryptoJS from "crypto-js";
 import { storeData } from "./storage";
+
 import axios from 'axios';
+import * as FileSystem from 'expo-file-system';
 
 
 
@@ -58,7 +57,7 @@ class Signup extends Component {
       bloodType: "A+",
       activityLevel: "medium",
       isSmoking: false,
-      hight: "170",
+      height: "170",
       weight: "60",
       diseaseList: [],
       newDiseaseName: "",
@@ -66,7 +65,7 @@ class Signup extends Component {
       vaccineList: [],
       newVaccineName: "",
       newVaccineDate: "",
-      surgeryList: "",
+      surgeryList: [],
       newSurgeryName: "",
       newSurgeryDate: "",
       newSurgeryIsSuccess: true,
@@ -80,6 +79,8 @@ class Signup extends Component {
       allTypesIndex: 0,
     };
 
+
+
     this.pickImage = this.pickImage.bind(this);
   }
 
@@ -89,46 +90,14 @@ class Signup extends Component {
       alert("Sorry, we need camera roll permissions to make this work!");
     }
   }
-  // pickImage = async () => {
-  //   let result = await ImagePicker.launchImageLibraryAsync({
-  //     mediaTypes: ImagePicker.MediaTypeOptions.All,
-  //     allowsEditing: true,
-  //     aspect: [4, 3],
-  //     quality: 1,
-  //   });
-  
-  //   console.log("result"+ result);
-  
-  //   if (!result.cancelled && result.uri) {
-  //     try {
-  //       const fileSize = await FileSystem.getInfoAsync(result.uri);
-  //       if (fileSize.size <= 4194304) { // 4 MB in bytes
-  //         const base64Image = await FileSystem.readAsStringAsync(result.uri, {
-  //           encoding: FileSystem.EncodingType.Base64,
-  //         });
-  //         console.log("base64:" + base64Image);
-  //         this.setState({ image: base64Image });
-  //       } else {
-  //         console.log("Image is too large. Must be less than 4 MB.");
-  //       }
-  //     } catch (error) {
-  //       console.error("Error reading file: ", error);
-  //     }
-  //   } else {
-  //     console.log("No image picked or invalid URI.");
-  //   }
-  // };
-
   pickImage = async () => {
     try {
-      // Requesting permissions to access the camera roll
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
         alert('Sorry, we need camera roll permissions to make this work!');
         return;
       }
   
-      // Launching the image picker
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -136,33 +105,43 @@ class Signup extends Component {
         quality: 1,
       });
   
-      // Handling the result when the image picker is not cancelled
-      if (!result.cancelled) {
-        // Getting image information including file size
-        const fileInfo = await FileSystem.getInfoAsync(result.uri);
-        console.log('File Info:', fileInfo);
+      //console.log("Image Picker Result:", JSON.stringify(result, null, 2));
   
-        // Check if the image size exceeds 4 MB
+      if (!result.cancelled && result.assets && result.assets.length > 0) {
+        const { uri } = result.assets[0];
+        if (!uri) {
+          console.error('No URI found on the image result.');
+          return;
+        }
+  
+        const fileInfo = await FileSystem.getInfoAsync(uri);
+        if (!fileInfo.exists) {
+          console.error('No file exists at the URI provided.');
+          return;
+        }
+  
         if (fileInfo.size > 4194304) {
           alert('Image is too large. Must be less than 4 MB.');
           return;
         }
   
-        // Reading the image as a Base64-encoded string
-        const base64Image = await FileSystem.readAsStringAsync(result.uri, {
+        const base64Image = await FileSystem.readAsStringAsync(uri, {
           encoding: FileSystem.EncodingType.Base64,
         });
   
-        // Updating the state with the Base64 image
+        //---temporarly 
         this.setState({ image: `data:image/jpeg;base64,${base64Image}` });
+        //this.setState({ image: `` });
+
+      } else {
+        console.log('Image picking was cancelled.');
       }
     } catch (error) {
-      // Logging any errors that occur during the image picking process
       console.error('Error picking image:', error);
       alert('Failed to pick image. Please try again.');
     }
   };
-  
+   
 
   componentDidMount() {
     this.requestCameraPermission();
@@ -301,21 +280,108 @@ class Signup extends Component {
     );
   };
 
-   getAllPatients = async () => {
+  //set ur own ip address
+   constructUrl = (ipAddress, endpoint) => {
+    return `http://${ipAddress}:3000${endpoint}`;
+  };
+  getAllPatients = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/patients');
-  
-      if (response.status === 200) {
-        console.log('Patients:', response.data);
-        // Handle the list of patients returned by the server
-      } else {
-        throw new Error('Failed to fetch patients');
-      }
+      //pass in ur ip address 
+      const url = this.constructUrl("10.21.128.63","/api/patients");
+
+      const response = await axios.get(url);
+      console.log("Patients before adding this object:")
+      console.log('Patients existing already:', response.data);
     } catch (error) {
-      console.error('Error:', error.message);
-      // Handle error
+      if (error.response) {
+        // Update UI accordinglys
+         console.log(error.response.data);
+
+        console.log(error.response.status);
+        console.log("---------------------------------------")
+
+        console.log(error.response.headers);
+        console.log("---------------------------------------")
+
+      } else if (error.request) {
+        console.log("rqquest erro---------------------------------------")
+
+        console.log(error.request);
+      } else {
+        console.log(" error message---------------------------------------")
+
+        console.log(`Error message: ${error.message}`);
+      }
     }
   };
+  
+  createPatientObject = () => {
+    const {
+      fullName,
+      email,
+      password,
+      nationality,
+      sex,
+      //add age
+      address,
+      phoneNumber,
+      bloodType,
+      activityLevel,
+      isSmoking,
+      height,
+      weight,
+      //addBloodPressure
+      //add allergies
+      diseases,
+      vaccines,
+      surgeries,
+      image,
+      familyChronicDiseases,
+      //see appointments
+    } = this.state;
+  
+    // Construct the JSON object based on the schema
+    const patientObject = {
+      fullName,
+      email,
+      password,
+      nationality,
+      sex,
+      address,
+      //age: '', 
+      // Age is not available add it
+      phoneNumber,
+      bloodType,
+      activityLevel,
+      isSmoking,
+      height: parseInt(height), // Convert height to a number
+      weight: parseInt(weight), // Convert weight to a number
+      //bloodPressure: null, 
+      //allergies: [],
+      //add allergies and blood pressure
+
+
+      diseases: diseases.map(disease => ({
+        disease_Name: disease.name, 
+        infection_start_Date: disease.date })),
+      vaccines: vaccines.map(vaccine => ({
+        name: vaccine.name,
+        date: vaccine.date 
+      })),
+      surgeries: surgeries.map(surgery => ({
+        name: surgery.name, 
+        date: surgery.date, 
+        recovered: surgery.success 
+      })),
+      image,
+      familyChronicDiseases,
+      medications: [], 
+      //medications not available
+      bookedAppointments: [],
+    };
+    return patientObject;
+  };
+
   
   renderSubmitButton = () => {
     const nextLabel = "Finish Registration";
@@ -325,20 +391,86 @@ class Signup extends Component {
         size={Button.sizes.large}
         marginT-10
         label={nextLabel}
-        onPress={() => {
+        onPress={this.renderFinishRegistration}
 
-          //TODO handlePatientRegistrationForm(this.state.fullName,this.state.email,CryptoJS.SHA256(this.state.password).toString(CryptoJS.enc.Hex),this.state.image,this.state.sex,this.state.age,this.state.nationality,this.state.address,this.state.phoneNumber,this.state.height,this.state.weight,this.state.bloodType,this.state.activityLevel,this.state.isSmoking,this.state.diseaseList,this.state.vaccineList,this.state.surgeryList,this.state.familyDiseaseList);
-
-          this.getAllPatients();
-          storeData(0);
-          router.push("/")
-        }
-      }
         backgroundColor="black"
       />
     );
   };
+  registerPatient = async (patientObject) => {
+    try {
+      // Make POST request to backend signup endpoint
+      const url = this.constructUrl("10.21.128.63", "/api/patients");
 
+      const response = await axios.post(url, patientObject);
+
+      
+      if (response.status === 201) {
+        alert("Patient created successfully!");
+      } else {
+        // Handle other status codes
+        alert("An error occurred while creating the patient.");
+      }
+    } catch (error) {
+      if (error.response.status === 400) {
+        alert("Email already exists. Please use a different email.");
+      }
+      else if(error.response.status === 500) {
+        alert("non Matching Passwords");
+      }
+      else {
+        // Handle other errors
+        console.log("Error:", error.message);
+        alert("An error occurred while creating the patient.");
+      }
+    }
+  };
+
+  renderFinishRegistration = async () => {
+    try {
+
+      const patientObject = {
+        fullName: this.state.fullName,
+        email: this.state.email,
+        password: this.state.password,
+        nationality: this.state.nationality,
+        sex: this.state.sex,
+        address: this.state.address,
+        age: this.state.age,
+        phoneNumber: this.state.phoneNumber,
+        activityLevel: this.state.activityLevel,
+        isSmoking: this.state.isSmoking,
+        height: parseInt(this.state.height), 
+        weight: parseInt(this.state.weight), 
+        diseases: this.state.diseaseList.map(disease => ({
+          disease_Name: disease.name,
+          infection_start_Date: new Date(disease.date)
+        })),
+        vaccines: this.state.vaccineList.map(vaccine => ({
+          name: vaccine.name,
+          date: new Date(vaccine.date)
+        })),
+        surgeries: this.state.surgeryList.map(surgery => ({
+          name: surgery.name,
+          date: new Date(surgery.date),
+          recovered: surgery.success
+        })),
+        familyChronicDiseases: this.state.familyDiseaseList.map(disease => ({
+          name: disease.name,
+          relation: disease.relation
+        })),
+      };
+ 
+      // Call registerPatient function
+      await this.registerPatient(patientObject);
+
+    
+    } catch (error) {
+      console.log("Error:", error.message);
+    }
+  };
+  
+  
   //////////////////////////////////////////////////////////////////////////
   SignUpInfo = () => {
     return (
@@ -861,8 +993,8 @@ class Signup extends Component {
               </Box>
             </View>
             {this.renderNextButton(
-              _.isNil(this.state.hight) ||
-                this.state.hight.trim().length === 0 ||
+              _.isNil(this.state.height) ||
+                this.state.height.trim().length === 0 ||
                 _.isNil(this.state.weight) ||
                 this.state.weight.trim().length === 0
             )}
@@ -1203,7 +1335,36 @@ class Signup extends Component {
               />
             </Wizard>
             {this.renderCurrentStep()}
-            {console.log(this.state)}
+            {/* {console.log(this.state.fullName)}
+         
+            {console.log("email:", this.state.email)}
+{console.log("password:", this.state.password)}
+{console.log("nationality:", this.state.nationality)}
+{console.log("sex:", this.state.sex)}
+{console.log("address:", this.state.address)}
+{console.log("age:", this.state.age)}
+{console.log("phoneNumber:", this.state.phoneNumber)}
+{console.log("activityLevel:", this.state.activityLevel)}
+{console.log("Smoking:", this.state.isSmoking)}
+{console.log("height:", this.state.height)}
+{console.log("weight:", this.state.weight)}
+{console.log("diseaseList:", this.state.diseaseList)}
+{console.log("vaccineList:", this.state.vaccineList)}
+{console.log("surgeryList:", this.state.surgeryList)}
+{console.log("familyDiseaseList:", this.state.familyDiseaseList)}
+
+            {console.log(this.state.diseaseList)}
+            {console.log(this.state.surgeryList)}
+
+            {console.log(this.state.familyDiseaseList)}
+            {console.log(this.state.vaccineList)}
+
+
+            {console.log("-----------------------------")} */}
+
+
+
+            
           </View>
         </ScrollView>
         {!_.isNil(toastMessage) && (

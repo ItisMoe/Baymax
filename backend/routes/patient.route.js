@@ -15,6 +15,8 @@ router.put("/:id", updatePatient);
 // delete a patient
 router.delete("/:id", deletePatient);
 
+router.get("/authenticated-endpoint",getAllPatients);
+router.get("/free-endpoint",getAllPatients);
 
 
 
