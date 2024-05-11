@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const Patient = require("./models/Patient.model.js");
 const patientRoute = require("./routes/patient.route.js");
+const doctorRoute=require("./routes/doctor.route.js")
 const cors = require('cors');
 
 const dbConnect = require("./db/dbConnect");
@@ -20,6 +21,7 @@ app.use(express.urlencoded({extended: false}));
 
 // routes
 app.use("/api/patients", patientRoute);
+app.use("/api/doctors",doctorRoute)
 
 app.get("/free-endpoint", auth,(request, response) => {
   response.json({ message: "You are free to access me anytime" });
