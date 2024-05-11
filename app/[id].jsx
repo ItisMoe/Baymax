@@ -6,6 +6,8 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
+import { useLocalSearchParams, router } from "expo-router";
+
 
 // Example data for appointments
 const appointmentsData = [
@@ -16,9 +18,12 @@ const appointmentsData = [
 ];
 //TO DO getDoctorAppointments(doctorId);
 
-const DoctorDetailsScreen = ({ route, navigation }) => {
+const DoctorNewDetailsScreen = () => {
   //const appointmentsData = //getDoctorAppointments(doctorId); //TO DO
-  const { doctorId } = route.params;
+  const params = useLocalSearchParams(); // Retrieve all parameters
+  console.log("Params received in DoctorNavigator:", params); // Log all params to verify
+
+  const doctorId = params.id; // Extract doctorId from params
   const [doctor, setDoctor] = useState(null);
   const [appointments, setAppointments] = useState([]);
 
@@ -34,7 +39,7 @@ const DoctorDetailsScreen = ({ route, navigation }) => {
         "https://media.istockphoto.com/id/1342708859/photo/portrait-of-a-male-doctor.jpg?s=612x612&w=0&k=20&c=7ojvfSnLNx73sR1xXTReBrIXJOZPpSNFZ3E9CodsfQU=",
     };
     setDoctor(doctorDetails);
-    console.log(doctorId +" this is me in the new work load")
+    console.log(doctorId + " this is me in the new work load");
     setAppointments(appointmentsData);
   }, [doctorId]);
 
@@ -43,7 +48,7 @@ const DoctorDetailsScreen = ({ route, navigation }) => {
       {doctor && (
         <>
           <Text style={styles.name}>{doctor.name}</Text>
-          <Text style={{color:'grey',fontSize:15}}>{doctor.location}</Text>
+          <Text style={{ color: "grey", fontSize: 15 }}>{doctor.location}</Text>
           <Text style={styles.detail}>{doctor.specialty}</Text>
           <View style={styles.separator} />
           <Text style={styles.header}>Available Appointments:</Text>
@@ -56,15 +61,15 @@ const DoctorDetailsScreen = ({ route, navigation }) => {
               ]}
               onPress={() =>
                 appointment.available &&
-                navigation.navigate("Booking", {
-                  doctorId: doctorId,
-                  time: appointment.time,
-                  date: appointment.date,
+                router.push({
+                  pathname: `./`,
                 })
               }
               disabled={!appointment.available}
             >
-              <Text style={styles.time}>{appointment.time} on {appointment.date}</Text>
+              <Text style={styles.time}>
+                {appointment.time} on {appointment.date}
+              </Text>
             </TouchableOpacity>
           ))}
         </>
@@ -85,7 +90,7 @@ const styles = StyleSheet.create({
   detail: {
     fontSize: 18,
     marginVertical: 5,
-    fontWeight:'bold',
+    fontWeight: "bold",
   },
   separator: {
     height: 1,
@@ -113,4 +118,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DoctorDetailsScreen;
+export default DoctorNewDetailsScreen;

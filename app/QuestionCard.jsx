@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   },
   answerCount: {
     fontSize: 16,
-    color: "#444",
+    color: "grey",
     marginTop: 5,
   },
   footer: {

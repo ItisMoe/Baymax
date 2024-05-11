@@ -5,6 +5,7 @@ import { TabBar, Tab, Layout, Text } from "@ui-kitten/components";
 import QAScreen from "./QAScreen";
 import PostsScreen from "./PostsScreen";
 import FeedScreen from "./FeedScreen";
+import Articles from "./Articles";
 
 const { Navigator, Screen } = createMaterialTopTabNavigator();
 
@@ -20,7 +21,7 @@ const TopTabBar = ({ navigation, state }) => (
 
 const TabNavigator = () => (
   <Navigator tabBar={(props) => <TopTabBar {...props} />}>
-    <Screen name="Posts" component={PostsScreen} />
+    <Screen name="Posts" component={Articles} />
     <Screen name="QA" component={QAScreen} />
   </Navigator>
 );

@@ -955,12 +955,8 @@ class Signup extends Component {
                     <Picker.Item label="A-" value="A-" />
                     <Picker.Item label="B+" value="B+" />
                     <Picker.Item label="B-" value="B-" />
-                    <Picker.Item label="AO+" value="AO+" />
-                    <Picker.Item label="AO-" value="AO-" />
-                    <Picker.Item label="BO+" value="BO+" />
-                    <Picker.Item label="BO-" value="BO-" />
-                    <Picker.Item label="AB+" value="AB+" />
-                    <Picker.Item label="AB-" value="AB-" />
+                    <Picker.Item label="O+" value="O+" />
+                    <Picker.Item label="O-" value="O-" />
                   </Picker>
                 </FormControl>
                 <FormControl
