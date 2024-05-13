@@ -1,19 +1,24 @@
 const axios = require('axios');
+const OpenAI = require('openai');
+const openai = new OpenAI({
+    apiKey: 'sk-proj-PyTednLXhw4rpe5TSUJiT3BlbkFJ64arPjQ5EcJvALnGFe1E',
+  });
+
 
 // Define the data to send in the request
-const requestData = {
+const requestData={
     "itching": 0,
     "skin_rash": 0,
     "nodal_skin_eruptions": 0,
     "continuous_sneezing": 0,
-    "shivering": 0,
+    "shivering": 1,
     "chills": 0,
     "joint_pain": 0,
     "stomach_pain": 0,
     "acidity": 0,
     "ulcers_on_tongue": 0,
     "muscle_wasting": 0,
-    "vomiting": 1,
+    "vomiting": 0,
     "burning_micturition": 0,
     "spotting_ urination": 0,
     "fatigue": 0,
@@ -44,8 +49,8 @@ const requestData = {
     "abdominal_pain": 0,
     "diarrhoea": 0,
     "mild_fever": 0,
-    "yellow_urine": 0,
-    "yellowing_of_eyes": 0,
+    "yellow_urine": 1,
+    "yellowing_of_eyes": 1,
     "acute_liver_failure": 0,
     "fluid_overload": 0,
     "swelling_of_stomach": 0,
@@ -86,7 +91,7 @@ const requestData = {
     "stiff_neck": 0,
     "swelling_joints": 0,
     "movement_stiffness": 0,
-    "spinning_movements": 1,
+    "spinning_movements": 0,
     "loss_of_balance": 0,
     "unsteadiness": 0,
     "weakness_of_one_body_side": 0,
@@ -134,17 +139,43 @@ const requestData = {
     "blister": 0,
     "red_sore_around_nose": 0,
     "yellow_crust_ooze": 0
-  };
-  
-  
+  }
+;  
 
-// Make a POST request to your Flask API
-axios.post('http://10.21.128.63:5000', requestData)
-    .then(response => {
+const getPrompt = async (requestData) => {
+    try {
+        const response = await axios.post('http://10.21.128.63:5000', requestData);
         console.log('Response:', response.data);
-        // Handle the response data here
-    })
-    .catch(error => {
+        return response.data;
+    } catch (error) {
         console.error('Error:', error);
-        // Handle errors here
-    });
+        return "Something wrong happened";
+    }
+};
+
+async function getResponseOpenAI() {
+    try {
+        const prompt = await getPrompt(requestData);
+        console.log('Processed result:', prompt);
+
+        const completion = await openai.chat.completions.create({
+            messages: [
+                { role: "system", content: "You are a helpful assistant designed to output JSON." },
+                { role: "user", content: prompt },
+            ],
+            model: "gpt-3.5-turbo-0125",
+            response_format: { type: "json_object" },
+        });
+
+        // console.log(completion.choices[0].message.content);
+        const responseObject = completion.choices[0].message.content;
+
+        // Print out the JSON object
+        console.log("---------------------------------------");
+        console.log(JSON.stringify(responseObject, null, 2));
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+getResponseOpenAI();

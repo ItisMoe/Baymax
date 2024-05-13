@@ -77,6 +77,8 @@ class Signup extends Component {
       activeIndex: 0,
       completedStepIndex: undefined,
       allTypesIndex: 0,
+      emailExists: false,
+      errorMessage: '',
     };
 
 
@@ -385,19 +387,48 @@ class Signup extends Component {
   
   renderSubmitButton = () => {
     const nextLabel = "Finish Registration";
-
+//so router.push are inside registerPatient(on success)
     return (
       <Button
         size={Button.sizes.large}
         marginT-10
         label={nextLabel}
-        onPress={this.renderFinishRegistration}
+        onPress={
+
+          this.renderFinishRegistration}
 
         backgroundColor="black"
       />
     );
   };
+  handleBlur = () => {
+    const { email } = this.state;
+    this.checkEmailExists(email);
+  };
+  
+  checkEmailExists = (email) => {
+    // Perform your API request here to check if the email exists
+    const url = this.constructUrl("10.21.128.63", "/api/patients/checkEmail");
+    axios.post(url, { email })
+      .then(response => {
+      if (response.status === 201) {
+          this.setState({ emailExists: false, errorMessage: '' });
+        } 
+      })
+      .catch(error => {
+        if (error.response.status === 500) {
+          alert("Email exists");
+          this.setState({ emailExists: true, errorMessage: 'Email already exists' });
+        }
+        else{alert("Error chec king email: " + error.message);
+        this.setState({ emailExists: false, errorMessage: 'Error checking email' });}
+        
+      });
+  };
+  
+  
   registerPatient = async (patientObject) => {
+    console.log("finish clickeddd")
     try {
       // Make POST request to backend signup endpoint
       const url = this.constructUrl("10.21.128.63", "/api/patients");
@@ -406,20 +437,21 @@ class Signup extends Component {
 
       
       if (response.status === 201) {
+
         alert("Patient created successfully!");
+        storeData(0,this.state.email)
+        router.push("/");
       } else {
-        // Handle other status codes
-        alert("An error occurred while creating the patient.");
+        alert("Error creating account.Please try again later");
       }
     } catch (error) {
       if (error.response.status === 400) {
         alert("Email already exists. Please use a different email.");
       }
       else if(error.response.status === 500) {
-        alert("non Matching Passwords");
+        alert("Error Creating patient");
       }
       else {
-        // Handle other errors
         console.log("Error:", error.message);
         alert("An error occurred while creating the patient.");
       }
@@ -462,7 +494,8 @@ class Signup extends Component {
       };
  
       // Call registerPatient function
-      await this.registerPatient(patientObject);
+      console.log("finish registration clicked");
+       this.registerPatient(patientObject);
 
     
     } catch (error) {
@@ -510,10 +543,16 @@ class Signup extends Component {
           </FormControlLabel>
           <TextInput
             style={{ marginTop: 10, width: "50em" }}
-            placeholder="Type Your Email"
+            placeholder="Type Your Emaail"
             value={this.state.email}
             onChangeText={(email) => this.setEmail(email)}
-          />
+          onBlur={this.handleBlur} // Call handleBlur on blur event
+        
+            
+        />
+          {this.state.emailExists && (
+            <Text style={{ color: 'red', marginTop: 5 }}>{this.state.errorMessage}</Text>
+          )} 
         </FormControl>
         <FormControl
           size="md"
@@ -955,8 +994,12 @@ class Signup extends Component {
                     <Picker.Item label="A-" value="A-" />
                     <Picker.Item label="B+" value="B+" />
                     <Picker.Item label="B-" value="B-" />
-                    <Picker.Item label="O+" value="O+" />
-                    <Picker.Item label="O-" value="O-" />
+                    <Picker.Item label="AO+" value="AO+" />
+                    <Picker.Item label="AO-" value="AO-" />
+                    <Picker.Item label="BO+" value="BO+" />
+                    <Picker.Item label="BO-" value="BO-" />
+                    <Picker.Item label="AB+" value="AB+" />
+                    <Picker.Item label="AB-" value="AB-" />
                   </Picker>
                 </FormControl>
                 <FormControl
