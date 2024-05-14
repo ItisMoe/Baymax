@@ -1,7 +1,14 @@
-import { Alert, KeyboardAvoidingView, Platform, Pressable } from "react-native";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  Image,
+} from "react-native";
 import { StyleSheet, ScrollView } from "react-native";
 import { View, Text, Button } from "react-native-ui-lib";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "./firebase";
 
 import {
@@ -16,13 +23,38 @@ import CryptoJS from "crypto-js";
 import { router } from "expo-router";
 import Toast from "./Toast";
 import { storeData } from "./storage";
-const Login = () => {
+import * as ImagePicker from "expo-image-picker";
+
+const DoctorSignup = () => {
   const [email, setEmail] = useState("");
   const [toastVisible, setToastVisible] = useState(false);
   const [pass, setPass] = useState("");
   const [passError, setPassError] = useState(false);
+  const [image, setImage] = useState(null);
 
-  // Getting the dispatch function
+
+   const requestCameraPermission = async () => {
+     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+     if (status !== "granted") {
+       alert("Sorry, we need camera roll permissions to make this work!");
+     }
+   };
+
+   const pickImage = async () => {
+     // No permissions request is necessary for launching the image library
+     let result = await ImagePicker.launchImageLibraryAsync({
+       mediaTypes: ImagePicker.MediaTypeOptions.All,
+       allowsEditing: true,
+       aspect: [4, 3],
+       quality: 1,
+     });
+
+     console.log(result);
+
+     if (!result.canceled) {
+       setImage(result.assets[0].uri);
+     }
+   };
 
   const handleEmailChange = (newEmail) => {
     setEmail(newEmail);
@@ -32,53 +64,22 @@ const Login = () => {
     setPass(newPass);
   };
 
-  const handleLogin = () => {
-    const hashedPassword = CryptoJS.SHA256(pass).toString(CryptoJS.enc.Hex);
-    console.log(hashedPassword);
-    // const result = verifyCredentials(email,hashedPassword); TODO
-    const result = 1;
-
-    switch (result) {
-      case -1:
-        setPassError(true);
-        setToastVisible(true);
-        setTimeout(() => setToastVisible(false), 3500);
-        break;
-      case 0:
-        signInWithEmailAndPassword(auth, email, pass)
-          .then(() => console.log("Login Successful"))
-          .catch((err) => Alert.alert("Login error", err.message));
-        // Fire.login(email, pass);
-        storeData(result, email);
-        setToastVisible(true);
-        setTimeout(() => setToastVisible(false), 3500);
-        setTimeout(() => {
-          setToastVisible(false);
-          setTimeout(() => {
-            router.push("/"); //patient
-          }, 1500);
-        }, 1500);
-        break;
-      case 1:
-        signInWithEmailAndPassword(auth, email, pass)
-          .then(() => console.log("Login Successful"))
-          .catch((err) => Alert.alert("Login error", err.message));
-
-        storeData(result, email);
-        // Fire.login(email, pass);
-        setToastVisible(true);
-        setTimeout(() => setToastVisible(false), 3500);
-        setTimeout(() => {
-          setToastVisible(false);
-          setTimeout(() => {
-            router.push("/"); //doctor
-          }, 1500);
-        }, 1500);
-        break;
-      default:
-        console.error("code result was not expected like this");
+  const handleSignup = () => {
+    if (email && pass && image) {
+      const hashedPassword = CryptoJS.SHA256(pass).toString(CryptoJS.enc.Hex);
+      console.log(hashedPassword);
+      // const result = verifyCredentials(email,hashedPassword); TODO add user
+      storeData(1, email);
+      createUserWithEmailAndPassword(auth, email, pass)
+        .then(() => console.log("Sign up Successful"))
+        .catch((err) => console.log("Sign up error:", err.message));
+      router.push("/");
+    } else {
+      setToastVisible(true);
+      setPassError(true);
     }
   };
+
 
   return (
     <KeyboardAvoidingView
@@ -92,7 +93,7 @@ const Login = () => {
             visible={toastVisible}
             message={passError ? "Incorrect Credentials" : "Login Successful"}
           />
-          <Text style={{ fontSize: 40, fontWeight: 900, marginBottom: 100 }}>
+          <Text style={{ fontSize: 40, fontWeight: 900, marginBottom: 70 }}>
             Login
           </Text>
           <View row marginT-10>
@@ -120,7 +121,7 @@ const Login = () => {
                 />
               </FormControl>
               <FormControl
-                style={{ marginBottom: 100 }}
+                style={{ marginBottom: 30 }}
                 size="md"
                 isDisabled={false}
                 isInvalid={false}
@@ -142,20 +143,35 @@ const Login = () => {
                   onChangeText={handlePassChange}
                 />
               </FormControl>
+              <FormControl style={{ marginBottom: 70 }}>
+                <FormControlLabelText
+                  style={{ fontSize: 25, fontWeight: 600, marginBottom: 20 }}
+                >
+                  Upload Certificate
+                </FormControlLabelText>
+                <View style={styles.container}>
+                  <Button
+                  label="Upload"
+                    title="Pick an image from camera roll"
+                    onPress={pickImage}
+                  />
+                  {image && (
+                    <Image source={{ uri: image }} style={styles.image} />
+                  )}
+                </View>
+              </FormControl>
             </Box>
           </View>
           <Button
-            label="Login"
-            disabled={email.trim().length === 0 || pass.trim().length === 0}
+            label="Register"
+            disabled={
+              email.trim().length === 0 ||
+              pass.trim().length === 0 ||
+              image === null
+            }
             title="Login"
-            onPress={handleLogin}
+            onPress={handleSignup}
           />
-          <Pressable
-            style={{ marginTop: 10, marginLeft: 10 }}
-            onPress={() => router.push("/ForgotPassowrd")}
-          >
-            <Text color="grey">Reset Password?</Text>
-          </Pressable>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -171,7 +187,9 @@ const styles = StyleSheet.create({
   image: {
     width: 200,
     height: 200,
+    marginLeft:30,
     marginTop: 10,
+    borderRadius:20,
   },
   allTypes: {
     justifyContent: "space-between",
@@ -189,4 +207,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Login;
+export default DoctorSignup;

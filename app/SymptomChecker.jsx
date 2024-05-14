@@ -7,11 +7,10 @@ import {
   StyleSheet,
   Animated,
 } from "react-native";
-import {
-  Button,
-} from "react-native-ui-lib";
+import { Button } from "react-native-ui-lib";
 import { FontAwesome5 } from "@expo/vector-icons";
 import Collapsible from "react-native-collapsible";
+import { useNavigation } from "@react-navigation/native";
 // import { LinearGradient } from "expo-linear-gradient";
 
 const symptomsByCategory = {
@@ -159,10 +158,10 @@ const categoryIcons = {
   Infectious: "disease",
 };
 
-
-const SymptomChecker = ({navigation}) => {
-  const [selectedSymptoms, setSelectedSymptoms] = useState({});
-  const [disable,setDisable] = useState(true);
+const SymptomChecker = () => {
+  const navigation = useNavigation();
+  const [selectedSymptoms, setSelectedSymptoms] = useState([]);
+  const [disable, setDisable] = useState(true);
   const [collapsed, setCollapsed] = useState(
     Object.keys(symptomsByCategory).reduce(
       (acc, key) => ({ ...acc, [key]: true }),
@@ -172,9 +171,8 @@ const SymptomChecker = ({navigation}) => {
 
   const toggleSymptom = (symptom) => {
     setSelectedSymptoms((prev) => ({ ...prev, [symptom]: !prev[symptom] }));
-    if(selectedSymptoms.length!=0) setDisable(false);
-};
-
+    if (selectedSymptoms.length != 0) setDisable(false);
+  };
 
   const toggleCollapse = (category) => {
     setCollapsed((prev) => ({ ...prev, [category]: !prev[category] }));
@@ -295,14 +293,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 50,
-    marginVertical:40,
+    marginVertical: 40,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    marginBottom:40,
+    marginBottom: 40,
     elevation: 5,
   },
 });

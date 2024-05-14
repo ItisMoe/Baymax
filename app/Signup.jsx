@@ -32,7 +32,8 @@ import { Picker } from "@react-native-picker/picker";
 import { router } from "expo-router";
 import CryptoJS from "crypto-js";
 import { storeData } from "./storage";
-
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "./firebase";
 
 const stepTypes = _.map(Wizard.States, (state) => {
   return <Text key={state}>{state}</Text>;
@@ -62,6 +63,7 @@ class Signup extends Component {
       newVaccineName: "",
       newVaccineDate: "",
       surgeryList: "",
+      age: "",
       newSurgeryName: "",
       newSurgeryDate: "",
       newSurgeryIsSuccess: true,
@@ -244,11 +246,20 @@ class Signup extends Component {
         marginT-10
         label={nextLabel}
         onPress={() => {
-          storeData(0);
+          storeData(0, this.state.email);
+          createUserWithEmailAndPassword(
+            auth,
+            this.state.email,
+            this.state.password
+          )
+            .then(() => console.log("Sign up Successful"))
+            .catch((err) => console.log("Sign up error:", err.message));
+
+
+          // Fire.signup(this.state.email, this.state.password);
           //TODO handlePatientRegistrationForm(this.state.fullName,this.state.email,CryptoJS.SHA256(this.state.password).toString(CryptoJS.enc.Hex),this.state.image,this.state.sex,this.state.age,this.state.nationality,this.state.address,this.state.phoneNumber,this.state.height,this.state.weight,this.state.bloodType,this.state.activityLevel,this.state.isSmoking,this.state.diseaseList,this.state.vaccineList,this.state.surgeryList,this.state.familyDiseaseList);
-          router.push("/")
-        }
-      }
+          router.push("/");
+        }}
         backgroundColor="black"
       />
     );

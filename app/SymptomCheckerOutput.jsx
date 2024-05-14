@@ -11,11 +11,11 @@ import {
   ScrollView,
 } from "react-native";
 
-const SymptomCheckerOutput = ({ route }) => {
+const SymptomCheckerOutput = ({ route,navigation }) => {
   const [isLoading, setLoading] = useState(true);
   const [disease, setDisease] = useState();
   const [doctors, setDoctors] = useState([]);
-  const { selectedSymptoms } = route.params;
+  const { selectedSymptoms } = route.params.selectedSymptoms;
   const json = {
     disease: {
       name: "Type 2 Diabetes",

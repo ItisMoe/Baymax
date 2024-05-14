@@ -3,11 +3,16 @@ import NavigationPages from "./NavigationPages";
 import { ApplicationProvider } from "@ui-kitten/components";
 import * as eva from "@eva-design/eva";
 import StarterPage from "./StarterPage";
-import { retrieveAccountType, retrieveIsLogged } from "./storage";
+import { resetDb, retrieveAccountType, retrieveIsLogged } from "./storage";
+import { auth, database } from "./firebase";
+import { signOut } from "firebase/auth";
+import DoctorNavigationPages from './DoctorNavigationPages';
+
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(null);
   const [accountType, setAccountType] = useState(null);
+
 
   useEffect(() => {
     const fetchAuthDetails = async () => {
@@ -25,9 +30,7 @@ const App = () => {
     if (isLoggedIn === "true" && accountType === "Patient")
       return <NavigationPages />;
     else if (isLoggedIn === "true" && accountType === "Doctor")
-      return <DocNavigationPages />;
-    else if (isLoggedIn === "true" && accountType === "Admin")
-      return <AdminNavigationPages />;
+      return <DoctorNavigationPages />;
     else return <StarterPage />;
   };
 

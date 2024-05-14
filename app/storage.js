@@ -1,14 +1,10 @@
 // storage.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const storeData = async (code) => {
+export const storeData = async (code,email) => {
     let isLogged;
     let accountType;
     switch(code){
-        case -1:
-            isLogged="false";
-            accountType='Patient';
-            break;
         case 0:
             isLogged="true";
             accountType='Patient'
@@ -17,14 +13,11 @@ export const storeData = async (code) => {
             isLogged="true";
             accountType='Doctor'
             break;
-        case 2:
-            isLogged="true";
-            accountType='Admin';
-            break;
     }
   try {
     await AsyncStorage.setItem('isLogged', isLogged);
     await AsyncStorage.setItem('accountType', accountType);
+    await AsyncStorage.setItem("email", email);
   } catch (e) {
     console.error("Failed to save the data to the storage", e);
   }
@@ -48,60 +41,33 @@ export const retrieveAccountType = async () => {
     console.error("Failed to retrieve the data from the storage", e);
   }
 }
-export const storePostData = async (title,body,creatorName,date,image) => {
+export const retrieveUsername = async () => {
   try {
-    await AsyncStorage.setItem('postTitle', title);
-    await AsyncStorage.setItem('postBody', body);
-    await AsyncStorage.setItem('postCreatorName', creatorName);
-    await AsyncStorage.setItem('postDate', date);
-    await AsyncStorage.setItem('postImage', image);
+    const result = await AsyncStorage.getItem("email");
+    console.log(result);
+    const username = result.split("@")[0];
+    console.log(username)
+    return username;
+  } catch (e) {
+    console.error("Failed to retrieve the data from the storage", e);
+  }
+};
+export const retrieveEmail = async () => {
+  try {
+    const result = await AsyncStorage.getItem("email");
+    console.log(result);
+    return result;
+  } catch (e) {
+    console.error("Failed to retrieve the data from the storage", e);
+  }
+};
 
-  } catch (e) {
-    console.error("Failed to save the data to the storage", e);
-  }
-}
-export const retrievePostTitle = async () => {
+export const resetDb = async () => {
   try {
-    const result = await AsyncStorage.getItem('postTitle');
-    console.log(result);
-    return result;
+    await AsyncStorage.setItem("isLogged", "false");
+    await AsyncStorage.setItem("accountType", "");
+    await AsyncStorage.setItem("email", "");
   } catch (e) {
-    console.error("Failed to retrieve the data from the storage", e);
-  }
-}
-export const retrievePostBody = async () => {
-  try {
-    const result = await AsyncStorage.getItem('postBody');
-    console.log(result);
-    return result;
-  } catch (e) {
-    console.error("Failed to retrieve the data from the storage", e);
-  }
-}
-export const retrievePostDate = async () => {
-  try {
-    const result = await AsyncStorage.getItem('postDate');
-    console.log(result);
-    return result;
-  } catch (e) {
-    console.error("Failed to retrieve the data from the storage", e);
-  }
-}
-export const retrievePostCreatorName = async () => {
-  try {
-    const result = await AsyncStorage.getItem('postCreatorName');
-    console.log(result);
-    return result;
-  } catch (e) {
-    console.error("Failed to retrieve the data from the storage", e);
-  }
-}
-export const retrievePostImage = async () => {
-  try {
-    const result = await AsyncStorage.getItem('postImage');
-    console.log(result);
-    return result;
-  } catch (e) {
-    console.error("Failed to retrieve the data from the storage", e);
+    console.error("Failed to reset the data of the storage", e);
   }
 }
