@@ -1,12 +1,24 @@
+import React, { useState } from "react";
+import {
+  ScrollView,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+} from "react-native";
+import { Button } from "react-native-ui-lib";
+import Collapsible from "react-native-collapsible";
+import { useNavigation } from "@react-navigation/native";
 
-import React, { useState } from 'react';
+
 import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert, Animated } from 'react-native';
 import { MaterialCommunityIcons,FontAwesome5 } from '@expo/vector-icons';
 import CustomCheckbox from './CustomCheckBox';
 import axios from 'axios';
 
 
-// Simplified categories and mapping provided earlier
+// Simplified categories and  provided earlier
 
 const detailedSymptomMapping = {
   // Respiratory Symptoms
@@ -123,6 +135,22 @@ const categoryIcons = {
   "Other Symptoms": "biohazard"
 };
 
+// <<<<<<< Moe-Branch
+// const SymptomChecker = () => {
+//   const navigation = useNavigation();
+//   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
+//   const [disable, setDisable] = useState(true);
+//   const [collapsed, setCollapsed] = useState(
+//     Object.keys(symptomsByCategory).reduce(
+//       (acc, key) => ({ ...acc, [key]: true }),
+//       {}
+//     )
+//   );
+
+//   const toggleSymptom = (symptom) => {
+//     setSelectedSymptoms((prev) => ({ ...prev, [symptom]: !prev[symptom] }));
+//     if (selectedSymptoms.length != 0) setDisable(false);
+// =======
 const SymptomChecker = ({navigation}) => {
   const [checkedState, setCheckedState] = useState(new Map());
   const [openCategory, setOpenCategory] = useState({});
@@ -274,11 +302,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     margin: 10,
   },
+  button: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 50,
+    marginVertical: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    marginBottom: 40,
+    elevation: 5,
+    
   predictButtonText: {
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
     marginLeft: 10,
+
   },
   icon: {
     marginRight: 10,

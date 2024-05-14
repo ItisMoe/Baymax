@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -11,43 +11,48 @@ import {
 import QuestionCard from "./QuestionCard";
 import AnswerModal from "./AnswerModal";
 import { FontAwesome } from "@expo/vector-icons";
+import { retrieveUsername, retrieveAccountType } from "./storage";
 
 const QAList = [
   {
-    "question": "What is React Native?",
-    "date": "2024-05-01",
-    "creator": "Jane Doe",
-    "answers": [
+    question: "What is React Native?",
+    date: "2024-05-01",
+    creator: "Jane Doe",
+    answers: [
       {
-        "answer": "React Native is a framework for building native apps using React.",
-        "creator": "John Smith",
-        "date": "2024-05-02"
+        answer:
+          "React Native is a framework for building native apps using React.",
+        creator: "John Smith",
+        date: "2024-05-02",
       },
       {
-        "answer": "It allows you to use JavaScript and React along with native platform capabilities.",
-        "creator": "Alice Johnson",
-        "date": "2024-05-02"
-      }
-    ]
+        answer:
+          "It allows you to use JavaScript and React along with native platform capabilities.",
+        creator: "Alice Johnson",
+        date: "2024-05-02",
+      },
+    ],
   },
   {
-    "question": "How does state management work in React?",
-    "date": "2024-05-03",
-    "creator": "Bob Lee",
-    "answers": [
+    question: "How does state management work in React?",
+    date: "2024-05-03",
+    creator: "Bob Lee",
+    answers: [
       {
-        "answer": "State management in React can be done using useState hook for component local state, or using libraries like Redux or Context API for global state.",
-        "creator": "Emily Roe",
-        "date": "2024-05-04"
+        answer:
+          "State management in React can be done using useState hook for component local state, or using libraries like Redux or Context API for global state.",
+        creator: "Emily Roe",
+        date: "2024-05-04",
       },
       {
-        "answer": "React's state management is primarily about managing data that affects rendering. It's typically handled inside components or using state management libraries.",
-        "creator": "Mike Doe",
-        "date": "2024-05-04"
-      }
-    ]
-  }
-]
+        answer:
+          "React's state management is primarily about managing data that affects rendering. It's typically handled inside components or using state management libraries.",
+        creator: "Mike Doe",
+        date: "2024-05-04",
+      },
+    ],
+  },
+];
 
 const QAScreen = () => {
   const [questions, setQuestions] = useState(QAList);
@@ -57,6 +62,8 @@ const QAScreen = () => {
   const [selectedAnswers, setSelectedAnswers] = useState([]);
   const [addQuestionModalVisible, setAddQuestionModalVisible] = useState(false);
   const [newQuestion, setNewQuestion] = useState("");
+  const [isDoctor, setIsDoctor] = useState(false);
+  const [selectedQuestion, setSelectedQuestion] = useState("");
 
   const handleSearch = (text) => {
     setSearchQuery(text);
@@ -66,16 +73,29 @@ const QAScreen = () => {
     setFilteredQuestions(filteredData);
   };
 
-  const handlePress = (answers) => {
+  const handlePress = (answers, question) => {
     setSelectedAnswers(answers);
     setModalVisible(true);
+    setSelectedQuestion(question);
   };
+  useEffect(() => {
+    const checkAccountType = async () => {
+      const accountType = await retrieveAccountType();
+      if (accountType === "Doctor") {
+        setIsDoctor(true);
+      }
+    };
 
-  const handleAddQuestion = () => {
+    checkAccountType();
+  }, []);
+
+  const handleAddQuestion = async () => {
+    const userName = await retrieveUsername();
+
     const newQA = {
       question: newQuestion,
       date: new Date().toISOString().split("T")[0],
-      creator: "Anonymous",
+      creator: userName,
       answers: [],
     };
     setQuestions([newQA, ...questions]);
@@ -97,18 +117,22 @@ const QAScreen = () => {
         renderItem={({ item }) => (
           <QuestionCard
             question={item}
-            onPress={() => handlePress(item.answers)}
+            onPress={() => handlePress(item.answers, item.question)}
           />
         )}
         keyExtractor={(item, index) => index.toString()}
       />
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => setAddQuestionModalVisible(true)}
-      >
-        <FontAwesome name="plus" size={24} color="white" />
-      </TouchableOpacity>
+      {!isDoctor && (
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => setAddQuestionModalVisible(true)}
+        >
+          <FontAwesome name="plus" size={24} color="white" />
+        </TouchableOpacity>
+      )}
       <AnswerModal
+        isDoctor={isDoctor}
+        question={selectedQuestion}
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         answers={selectedAnswers}

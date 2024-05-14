@@ -1,6 +1,46 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 
+// <<<<<<< Moe-Branch
+// const SymptomCheckerOutput = ({ route,navigation }) => {
+//   const [isLoading, setLoading] = useState(true);
+//   const [disease, setDisease] = useState();
+//   const [doctors, setDoctors] = useState([]);
+//   const { selectedSymptoms } = route.params.selectedSymptoms;
+//   const json = {
+//     disease: {
+//       name: "Type 2 Diabetes",
+//       explanation:
+//         "Type 2 diabetes is a chronic condition that affects the way the body processes blood sugar (glucose). With type 2 diabetes, the body either resists the effects of insulin — a hormone that regulates the movement of sugar into your cells — or doesn't produce enough insulin to maintain normal glucose levels.",
+//     },
+//     doctors: [
+//       {
+//         id: 1,
+//         name: "Dr. Sarah Lee",
+//         specialty: "Endocrinologist",
+//         image:
+//           "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGnu4s-gW1OowMKMJPWCfqJsxSYEpLOaVi1A&s",
+//         contactInfo: "555-0100",
+//       },
+//       {
+//         id: 2,
+//         name: "Dr. John Doe",
+//         specialty: "General Practitioner",
+//         image:
+//           "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGnu4s-gW1OowMKMJPWCfqJsxSYEpLOaVi1A&s",
+//         contactInfo: "555-0102",
+//       },
+//       {
+//         id: 3,
+//         name: "Dr. Jane Smith",
+//         specialty: "Dietician",
+//         image:
+//           "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGnu4s-gW1OowMKMJPWCfqJsxSYEpLOaVi1A&s",
+//         contactInfo: "555-0103",
+//       },
+//     ],
+//   };
+// =======
 const SymptomCheckerOutput = ({ route }) => {
   const { diseaseInfo } = route.params;
 

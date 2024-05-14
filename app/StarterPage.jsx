@@ -28,7 +28,7 @@ const StarterPage = () => {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push("/DocSignUp")}
+        onPress={() => router.push("/DoctorSignup")}
       >
         <Icon name="user-md" size={20} color="#fff" />
         <Text style={styles.buttonText}>Sign Up as Doctor</Text>
