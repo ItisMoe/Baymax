@@ -35,6 +35,12 @@ import { storeData } from "./storage";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "./firebase";
 
+
+import axios from 'axios';
+import * as FileSystem from 'expo-file-system';
+
+
+
 const stepTypes = _.map(Wizard.States, (state) => {
   return <Text key={state}>{state}</Text>;
 });
@@ -54,7 +60,7 @@ class Signup extends Component {
       bloodType: "A+",
       activityLevel: "medium",
       isSmoking: false,
-      hight: "170",
+      height: "170",
       weight: "60",
       diseaseList: [],
       newDiseaseName: "",
@@ -62,8 +68,11 @@ class Signup extends Component {
       vaccineList: [],
       newVaccineName: "",
       newVaccineDate: "",
-      surgeryList: "",
+
       age: "",
+
+      surgeryList: [],
+
       newSurgeryName: "",
       newSurgeryDate: "",
       newSurgeryIsSuccess: true,
@@ -75,7 +84,11 @@ class Signup extends Component {
       activeIndex: 0,
       completedStepIndex: undefined,
       allTypesIndex: 0,
+      emailExists: false,
+      errorMessage: '',
     };
+
+
 
     this.pickImage = this.pickImage.bind(this);
   }
@@ -87,19 +100,57 @@ class Signup extends Component {
     }
   }
   pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Sorry, we need camera roll permissions to make this work!');
+        return;
+      }
+  
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+  
+      //console.log("Image Picker Result:", JSON.stringify(result, null, 2));
+  
+      if (!result.cancelled && result.assets && result.assets.length > 0) {
+        const { uri } = result.assets[0];
+        if (!uri) {
+          console.error('No URI found on the image result.');
+          return;
+        }
+  
+        const fileInfo = await FileSystem.getInfoAsync(uri);
+        if (!fileInfo.exists) {
+          console.error('No file exists at the URI provided.');
+          return;
+        }
+  
+        if (fileInfo.size > 4194304) {
+          alert('Image is too large. Must be less than 4 MB.');
+          return;
+        }
+  
+        const base64Image = await FileSystem.readAsStringAsync(uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+  
+        //---temporarly 
+        this.setState({ image: `data:image/jpeg;base64,${base64Image}` });
+        //this.setState({ image: `` });
 
-    console.log(result);
-
-    if (!result.canceled) {
-      this.setState({ image: result.assets[0].uri });
+      } else {
+        console.log('Image picking was cancelled.');
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      alert('Failed to pick image. Please try again.');
     }
   };
+   
 
   componentDidMount() {
     this.requestCameraPermission();
@@ -237,9 +288,113 @@ class Signup extends Component {
       />
     );
   };
+
+  //set ur own ip address
+   constructUrl = (ipAddress, endpoint) => {
+    return `http://${ipAddress}:3000${endpoint}`;
+  };
+  getAllPatients = async () => {
+    try {
+      //pass in ur ip address 
+      const url = this.constructUrl("10.21.128.63","/api/patients");
+
+      const response = await axios.get(url);
+      console.log("Patients before adding this object:")
+      console.log('Patients existing already:', response.data);
+    } catch (error) {
+      if (error.response) {
+        // Update UI accordinglys
+         console.log(error.response.data);
+
+        console.log(error.response.status);
+        console.log("---------------------------------------")
+
+        console.log(error.response.headers);
+        console.log("---------------------------------------")
+
+      } else if (error.request) {
+        console.log("rqquest erro---------------------------------------")
+
+        console.log(error.request);
+      } else {
+        console.log(" error message---------------------------------------")
+
+        console.log(`Error message: ${error.message}`);
+      }
+    }
+  };
+  
+  createPatientObject = () => {
+    const {
+      fullName,
+      email,
+      password,
+      nationality,
+      sex,
+      //add age
+      address,
+      phoneNumber,
+      bloodType,
+      activityLevel,
+      isSmoking,
+      height,
+      weight,
+      //addBloodPressure
+      //add allergies
+      diseases,
+      vaccines,
+      surgeries,
+      image,
+      familyChronicDiseases,
+      //see appointments
+    } = this.state;
+  
+    // Construct the JSON object based on the schema
+    const patientObject = {
+      fullName,
+      email,
+      password,
+      nationality,
+      sex,
+      address,
+      //age: '', 
+      // Age is not available add it
+      phoneNumber,
+      bloodType,
+      activityLevel,
+      isSmoking,
+      height: parseInt(height), // Convert height to a number
+      weight: parseInt(weight), // Convert weight to a number
+      //bloodPressure: null, 
+      //allergies: [],
+      //add allergies and blood pressure
+
+
+      diseases: diseases.map(disease => ({
+        disease_Name: disease.name, 
+        infection_start_Date: disease.date })),
+      vaccines: vaccines.map(vaccine => ({
+        name: vaccine.name,
+        date: vaccine.date 
+      })),
+      surgeries: surgeries.map(surgery => ({
+        name: surgery.name, 
+        date: surgery.date, 
+        recovered: surgery.success 
+      })),
+      image,
+      familyChronicDiseases,
+      medications: [], 
+      //medications not available
+      bookedAppointments: [],
+    };
+    return patientObject;
+  };
+
+  
   renderSubmitButton = () => {
     const nextLabel = "Finish Registration";
-
+//so router.push are inside registerPatient(on success)
     return (
       <Button
         size={Button.sizes.large}
@@ -258,13 +413,121 @@ class Signup extends Component {
 
           // Fire.signup(this.state.email, this.state.password);
           //TODO handlePatientRegistrationForm(this.state.fullName,this.state.email,CryptoJS.SHA256(this.state.password).toString(CryptoJS.enc.Hex),this.state.image,this.state.sex,this.state.age,this.state.nationality,this.state.address,this.state.phoneNumber,this.state.height,this.state.weight,this.state.bloodType,this.state.activityLevel,this.state.isSmoking,this.state.diseaseList,this.state.vaccineList,this.state.surgeryList,this.state.familyDiseaseList);
+               this.renderFinishRegistration
           router.push("/");
         }}
+
+
+    
+
         backgroundColor="black"
       />
     );
   };
+  handleBlur = () => {
+    const { email } = this.state;
+    this.checkEmailExists(email);
+  };
+  
+  checkEmailExists = (email) => {
+    // Perform your API request here to check if the email exists
+    const url = this.constructUrl("10.21.128.63", "/api/patients/checkEmail");
+    axios.post(url, { email })
+      .then(response => {
+      if (response.status === 201) {
+          this.setState({ emailExists: false, errorMessage: '' });
+        } 
+      })
+      .catch(error => {
+        if (error.response.status === 500) {
+          alert("Email exists");
+          this.setState({ emailExists: true, errorMessage: 'Email already exists' });
+        }
+        else{alert("Error chec king email: " + error.message);
+        this.setState({ emailExists: false, errorMessage: 'Error checking email' });}
+        
+      });
+  };
+  
+  
+  registerPatient = async (patientObject) => {
+    console.log("finish clickeddd")
+    try {
+      // Make POST request to backend signup endpoint
+      const url = this.constructUrl("10.21.128.63", "/api/patients");
 
+      const response = await axios.post(url, patientObject);
+
+      
+      if (response.status === 201) {
+
+        alert("Patient created successfully!");
+        storeData(0,this.state.email)
+        router.push("/");
+      } else {
+        alert("Error creating account.Please try again later");
+      }
+    } catch (error) {
+      if (error.response.status === 400) {
+        alert("Email already exists. Please use a different email.");
+      }
+      else if(error.response.status === 500) {
+        alert("Error Creating patient");
+      }
+      else {
+        console.log("Error:", error.message);
+        alert("An error occurred while creating the patient.");
+      }
+    }
+  };
+
+  renderFinishRegistration = async () => {
+    try {
+
+      const patientObject = {
+        fullName: this.state.fullName,
+        image:this.state.image, 
+        email: this.state.email,
+        password: this.state.password,
+        nationality: this.state.nationality,
+        sex: this.state.sex,
+        address: this.state.address,
+        age: this.state.age,
+        phoneNumber: this.state.phoneNumber,
+        activityLevel: this.state.activityLevel,
+        isSmoking: this.state.isSmoking,
+        height: parseInt(this.state.height), 
+        weight: parseInt(this.state.weight), 
+        diseases: this.state.diseaseList.map(disease => ({
+          disease_Name: disease.name,
+          infection_start_Date: new Date(disease.date)
+        })),
+        vaccines: this.state.vaccineList.map(vaccine => ({
+          name: vaccine.name,
+          date: new Date(vaccine.date)
+        })),
+        surgeries: this.state.surgeryList.map(surgery => ({
+          name: surgery.name,
+          date: new Date(surgery.date),
+          recovered: surgery.success
+        })),
+        familyChronicDiseases: this.state.familyDiseaseList.map(disease => ({
+          name: disease.name,
+          relation: disease.relation
+        })),
+      };
+ 
+      // Call registerPatient function
+      console.log("finish registration clicked");
+       this.registerPatient(patientObject);
+
+    
+    } catch (error) {
+      console.log("Error:", error.message);
+    }
+  };
+  
+  
   //////////////////////////////////////////////////////////////////////////
   SignUpInfo = () => {
     return (
@@ -304,10 +567,16 @@ class Signup extends Component {
           </FormControlLabel>
           <TextInput
             style={{ marginTop: 10, width: "50em" }}
-            placeholder="Type Your Email"
+            placeholder="Type Your Emaail"
             value={this.state.email}
             onChangeText={(email) => this.setEmail(email)}
-          />
+          onBlur={this.handleBlur} // Call handleBlur on blur event
+        
+            
+        />
+          {this.state.emailExists && (
+            <Text style={{ color: 'red', marginTop: 5 }}>{this.state.errorMessage}</Text>
+          )} 
         </FormControl>
         <FormControl
           size="md"
@@ -749,8 +1018,12 @@ class Signup extends Component {
                     <Picker.Item label="A-" value="A-" />
                     <Picker.Item label="B+" value="B+" />
                     <Picker.Item label="B-" value="B-" />
-                    <Picker.Item label="O+" value="O+" />
-                    <Picker.Item label="O-" value="O-" />
+                    <Picker.Item label="AO+" value="AO+" />
+                    <Picker.Item label="AO-" value="AO-" />
+                    <Picker.Item label="BO+" value="BO+" />
+                    <Picker.Item label="BO-" value="BO-" />
+                    <Picker.Item label="AB+" value="AB+" />
+                    <Picker.Item label="AB-" value="AB-" />
                   </Picker>
                 </FormControl>
                 <FormControl
@@ -783,8 +1056,8 @@ class Signup extends Component {
               </Box>
             </View>
             {this.renderNextButton(
-              _.isNil(this.state.hight) ||
-                this.state.hight.trim().length === 0 ||
+              _.isNil(this.state.height) ||
+                this.state.height.trim().length === 0 ||
                 _.isNil(this.state.weight) ||
                 this.state.weight.trim().length === 0
             )}
@@ -1125,7 +1398,36 @@ class Signup extends Component {
               />
             </Wizard>
             {this.renderCurrentStep()}
-            {console.log(this.state)}
+            {/* {console.log(this.state.fullName)}
+         
+            {console.log("email:", this.state.email)}
+{console.log("password:", this.state.password)}
+{console.log("nationality:", this.state.nationality)}
+{console.log("sex:", this.state.sex)}
+{console.log("address:", this.state.address)}
+{console.log("age:", this.state.age)}
+{console.log("phoneNumber:", this.state.phoneNumber)}
+{console.log("activityLevel:", this.state.activityLevel)}
+{console.log("Smoking:", this.state.isSmoking)}
+{console.log("height:", this.state.height)}
+{console.log("weight:", this.state.weight)}
+{console.log("diseaseList:", this.state.diseaseList)}
+{console.log("vaccineList:", this.state.vaccineList)}
+{console.log("surgeryList:", this.state.surgeryList)}
+{console.log("familyDiseaseList:", this.state.familyDiseaseList)}
+
+            {console.log(this.state.diseaseList)}
+            {console.log(this.state.surgeryList)}
+
+            {console.log(this.state.familyDiseaseList)}
+            {console.log(this.state.vaccineList)}
+
+
+            {console.log("-----------------------------")} */}
+
+
+
+            
           </View>
         </ScrollView>
         {!_.isNil(toastMessage) && (
