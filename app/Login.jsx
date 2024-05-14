@@ -13,6 +13,8 @@ import CryptoJS from "crypto-js";
 import { router } from "expo-router";
 import Toast from "./Toast";
 import { storeData } from "./storage";
+import axios from 'axios';
+
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -30,12 +32,39 @@ const Login = () => {
     setPass(newPass);
   };
 
-  const handleLogin = () => {
-    const hashedPassword = CryptoJS.SHA256(pass).toString(CryptoJS.enc.Hex);
-    console.log(hashedPassword);
-    // const result = verifyCredentials(email,hashedPassword); TODO
-    const result = 0;
-    storeData(result);
+  constructUrl = (ipAddress, endpoint) => {
+    return `http://${ipAddress}:3000${endpoint}`;
+  };
+    
+  verifyCredentials = async (email, pass) => {
+    try {
+      console.log("login called");
+      const loginObject = { email, pass };
+      const url = this.constructUrl("10.21.128.63", "/api/patients/login");
+      const response = await axios.post(url, loginObject);
+  
+      if (response.status === 200) {
+        const { message, userType } = response.data;
+        alert(message);
+        return userType;
+      } 
+    } catch (error) {
+      // Handle network errors or other exceptions
+      const { message, userType } = error.response.data;
+        alert(message);
+        return userType;
+    }
+  };
+  
+
+   handleLogin = async () => {
+    // const hashedPassword CryptoJS.SHA256(pass).toString(CryptoJS.enc.Hex);
+    // console.log(hashedPassword);
+    const result = await this.verifyCredentials(email,pass); 
+    console.log(result);
+    //const result = 0;
+    //storeData(result);
+    // result 0->patient ; 1 ->documentDirectory; 2->invalid Credentials;
     switch (result) {
       case -1:
         setPassError(true);

@@ -2,8 +2,8 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { TabBar, Tab, Layout, Text } from '@ui-kitten/components';
-import SymptomChecker from './SymptomChecker';
 import Consult from './Consult';
+import SymptomsMain  from './SymptomsMain';
 
 const { Navigator, Screen } = createMaterialTopTabNavigator();
 
@@ -19,7 +19,7 @@ const TopTabBar = ({ navigation, state }) => (
 
 const TabNavigator = () => (
   <Navigator tabBar={props => <TopTabBar {...props} />}>
-    <Screen name='Symptom Checker' component={SymptomChecker}/>
+    <Screen name='Symptom Checker' component={SymptomsMain}/>
     <Screen name='Consult' component={Consult}/>
   </Navigator>
 );

@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema; 
+
 
 const timeSlotSchema = new mongoose.Schema({
+    _id: { type: Schema.Types.ObjectId, auto: true },
     date: { type: Date, required: true }, 
     start_time: { type: String, required: true },
     end_time: { type: String, required: true },

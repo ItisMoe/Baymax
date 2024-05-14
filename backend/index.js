@@ -2,24 +2,40 @@ const express = require("express");
 const mongoose = require("mongoose");
 const Patient = require("./models/Patient.model.js");
 const patientRoute = require("./routes/patient.route.js");
+const doctorRoute=require("./routes/doctor.route.js");
+const predictionsRoute=require("./routes/diseasePrediction.route.js")
+const paymentRoutes = require('./routes/paymentRoutes.js');
+
 const cors = require('cors');
+
+
+
+
+
 
 const dbConnect = require("./db/dbConnect");
 
 
 const app = express();
 
+
+
 const auth = require("./auth");
 app.use(cors());
+
 require('dotenv').config(); 
 
 // middleware
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
+app.use('/payments', paymentRoutes);
+
+app.use('/predictions',predictionsRoute);
 
 // routes
 app.use("/api/patients", patientRoute);
+app.use("/api/doctors",doctorRoute)
 
 app.get("/free-endpoint", auth,(request, response) => {
   response.json({ message: "You are free to access me anytime" });
