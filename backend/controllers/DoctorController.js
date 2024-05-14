@@ -105,6 +105,8 @@ const addDoctor = async (req, res) => {
     }
   };
 
+
+  //also fetch the patient along with the appointment
   const getAvailableAppointments = async (req, res) => {
     console.log("method called");
     const { email, date } = req.body;
@@ -132,29 +134,104 @@ const addDoctor = async (req, res) => {
 };
 // Controller method to add a time slot for a doctor
 const addTimeSlot = async (req, res) => {
+  const { email, timeSlot } = req.body;
+  const { date, start_time, end_time } = timeSlot;
+
+  // Convert AM/PM times to 24-hour format
+  const startTime24 = convertTo24Hour(start_time);
+  const endTime24 = convertTo24Hour(end_time);
+
+  try {
+      const doctor = await Doctor.findOne({ email });
+      if (!doctor) {
+          return res.status(404).send('Doctor not found.');
+      }
+
+      const startTime = new Date(`${date}T${startTime24}:00`);
+      const endTime = new Date(`${date}T${endTime24}:00`);
+
+      // Validate the date objects
+      if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+          return res.status(400).send('Invalid date or time provided.');
+      }
+
+      // Check for overlapping or exact same time slots
+      const overlappingSlots = doctor.availableTimeSlots.filter(slot =>
+          new Date(slot.date).toDateString() === new Date(date).toDateString() &&
+          ((new Date(slot.start_time) <= startTime && new Date(slot.end_time) > startTime) ||
+           (new Date(slot.start_time) < endTime && new Date(slot.end_time) >= endTime) ||
+           (new Date(slot.start_time).getTime() === startTime.getTime() && new Date(slot.end_time).getTime() === endTime.getTime()))
+      );
+
+      if (overlappingSlots.length > 0) {
+          return res.status(400).send('Time slot overlaps with an existing slot or is exactly the same.');
+      }
+
+      // Add new time slot
+      const newSlot = {
+          date: startTime, // Storing both date and time together
+          start_time: startTime,
+          end_time: endTime,
+          status: 'Available' // Default status
+      };
+
+      doctor.availableTimeSlots.push(newSlot);
+      await doctor.save();
+      res.status(201).send('Time slot added successfully.');
+  } catch (error) {
+      console.error('Error adding time slot:', error);
+      res.status(500).send(error.message);
+  }
 };
 
 
+function convertTo24Hour(time) {
+  let [hours, minutes] = time.match(/\d{1,2}/g);
+  const modifier = time.match(/AM|PM/i)[0];
+
+  hours = parseInt(hours, 10);
+  minutes = parseInt(minutes, 10);
+
+  if (modifier.toUpperCase() === 'PM' && hours !== 12) {
+      hours += 12;
+  } else if (modifier.toUpperCase() === 'AM' && hours === 12) {
+      hours = 0;
+  }
+
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+}
+
 const getTimeSlotsByDate = async (req, res) => {
-    const { email, date } = req.params; // Assuming doctorId and date are passed as URL parameters     
+  const { email, date } = req.body; // Assuming 'date' is sent in the request body
 
-    try {
-        const doctor = await Doctor.findById(email);
-        if (!doctor) {
-            return res.status(404).json({ error: 'Doctor not found' });
-        }
+  console.log(email);
+  try {
+      const doctor = await Doctor.findOne({ email });
+      if (!doctor) {
+          return res.status(404).json({ error: 'Doctor not found' });
+      }
 
-        // Filter time slots based on the given date
-        const timeSlots = doctor.timeSlots.filter(slot =>
-            slot.date.toDateString() === new Date(date).toDateString()
-        );
+      if (!doctor.availableTimeSlots) {
+          return res.status(404).json({ error: 'No time slots found' });
+      }
 
-        // Respond with the filtered time slots for the given date
-        res.status(200).json({ timeSlots });
-    } catch (error) {
-        console.error('Error fetching time slots for doctor:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+      // Ensure the date is valid
+      const queryDate = new Date(date);
+      if (isNaN(queryDate.getTime())) {
+          return res.status(400).json({ error: 'Invalid date provided' });
+      }
+
+      // Filter time slots based on the given date
+      const timeSlots = doctor.availableTimeSlots.filter(slot =>
+          new Date(slot.date).toDateString() === queryDate.toDateString()
+      );
+
+      // Respond with the filtered time slots for the given date
+      res.status(200).json({ timeSlots });
+  } catch (error) {
+      console.error('Error fetching time slots for doctor:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
 };
 
 module.exports = { getAllDoctors, getDoctorByEmail,addTimeSlot,addDoctor,login,getAvailableAppointments,getTimeSlotsByDate };

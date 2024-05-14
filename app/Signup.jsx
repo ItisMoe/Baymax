@@ -463,6 +463,7 @@ class Signup extends Component {
 
       const patientObject = {
         fullName: this.state.fullName,
+        image:this.state.image, 
         email: this.state.email,
         password: this.state.password,
         nationality: this.state.nationality,

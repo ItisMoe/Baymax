@@ -24,11 +24,6 @@ const getAllPatients = async (req, res) => {
     }
   };
 
-
-
-
-
-
   const addPatient = async (req, res) => {
     try {
       const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -240,6 +235,32 @@ const getAllPatients = async (req, res) => {
       });
     }
   };
+
+  const getAvailableAppointments = async (req, res) => {
+    console.log("method called");
+    const { email, date } = req.body;
+    try {
+        // Find the patient by email
+        console.log("get all available appointments call");
+        const patient = await Patient.findOne({ patient });
+        if (!patient) {
+            return res.status(404).json({ error: 'lol not found' });
+        }
+
+        // Filter the doctor's appointments for the given date and status 'Available'
+        const availableAppointments = patient.appointments.filter(appointment =>
+            appointment.date.getTime() === new Date(date).getTime() 
+            //&& appointment.status === 'Available'
+        );
+
+        // Respond with the available appointments for the given date
+        console.log(availableAppointments);
+        res.status(200).json({ availableAppointments });
+    } catch (error) {
+        console.error('Error fetching available appointments:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
   
   module.exports = {
     login,
