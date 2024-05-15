@@ -12,7 +12,7 @@ import Collapsible from "react-native-collapsible";
 import { useNavigation } from "@react-navigation/native";
 
 
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert, Animated } from 'react-native';
+import { Alert } from 'react-native';
 import { MaterialCommunityIcons,FontAwesome5 } from '@expo/vector-icons';
 import CustomCheckbox from './CustomCheckBox';
 import axios from 'axios';
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     marginBottom: 40,
     elevation: 5,
-    
+  },
   predictButtonText: {
     color: 'white',
     fontWeight: 'bold',

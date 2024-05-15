@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Linking,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -24,6 +25,16 @@ const handleLogout = async () => {
   router.push("./");
 };
 
+const handleTalk = () => {
+  const url = "https://alanmemoe.netlify.app/"; // Change to your desired URL
+  Linking.canOpenURL(url).then((supported) => {
+    if (supported) {
+      Linking.openURL(url);
+    } else {
+      console.log("Don't know how to open URI: " + url);
+    }
+  });
+};
   return (
     <ScrollView style={styles.container}>
       <Image
@@ -45,6 +56,10 @@ const handleLogout = async () => {
       >
         <MaterialIcons name="support-agent" size={24} color="white" />
         <Text style={styles.buttonText}>Support</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleTalk} style={styles.button}>
+        <MaterialIcons name="talk" size={24} color="white" />
+        <Text style={styles.buttonText}>Talk With Baymax</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={handleLogout} style={styles.button}>
         <MaterialIcons name="logout" size={24} color="white" />

@@ -36,8 +36,15 @@ const MySchedule = () => {
           id: "2",
           date: "2024-05-06",
           time: "16:00",
-          doctorName: "Dr. Doe",
-          location: "Room 102, 456 Elm St, Rivertown",
+          doctorName: "Dr. Fathal",
+          location: "Beirut, Hamra",
+        },
+        {
+          id: "3",
+          date: "2024-05-07",
+          time: "05:00",
+          doctorName: "Dr. Azzam",
+          location: "London, England",
         },
       ]);
       setRefreshing(false);

@@ -15,40 +15,98 @@ import { retrieveUsername, retrieveAccountType } from "./storage";
 
 const QAList = [
   {
-    question: "What is React Native?",
-    date: "2024-05-01",
-    creator: "Jane Doe",
+    question: "What is the importance of medication adherence?",
+    date: "2024-05-15",
+    creator: "Dr. Sarah Lee",
     answers: [
       {
         answer:
-          "React Native is a framework for building native apps using React.",
-        creator: "John Smith",
-        date: "2024-05-02",
+          "Medication adherence ensures that patients take their medications as prescribed, which is crucial for the effectiveness of treatment, especially for chronic conditions.",
+        creator: "Dr. John Hargrove",
+        date: "2024-05-16",
       },
       {
         answer:
-          "It allows you to use JavaScript and React along with native platform capabilities.",
-        creator: "Alice Johnson",
-        date: "2024-05-02",
+          "Poor adherence can lead to significant health complications, higher healthcare costs, and increased mortality rates.",
+        creator: "Dr. Emily Thompson",
+        date: "2024-05-16",
       },
     ],
   },
   {
-    question: "How does state management work in React?",
-    date: "2024-05-03",
-    creator: "Bob Lee",
+    question: "How can digital health tools improve patient care?",
+    date: "2024-05-15",
+    creator: "Dr. Alex Kim",
     answers: [
       {
         answer:
-          "State management in React can be done using useState hook for component local state, or using libraries like Redux or Context API for global state.",
-        creator: "Emily Roe",
-        date: "2024-05-04",
+          "Digital health tools can enhance patient engagement, improve medication management, and allow doctors to monitor patients remotely, leading to better health outcomes.",
+        creator: "Dr. Natalie Chen",
+        date: "2024-05-16",
       },
       {
         answer:
-          "React's state management is primarily about managing data that affects rendering. It's typically handled inside components or using state management libraries.",
-        creator: "Mike Doe",
-        date: "2024-05-04",
+          "They provide real-time data that helps in making informed decisions and personalizing treatment plans.",
+        creator: "Dr. Mark Lee",
+        date: "2024-05-16",
+      },
+    ],
+  },
+  {
+    question:
+      "What are the benefits of telemedicine for chronic disease management?",
+    date: "2024-05-15",
+    creator: "Dr. Carlos Rodriguez",
+    answers: [
+      {
+        answer:
+          "Telemedicine allows for regular monitoring and management of chronic diseases without the need for frequent visits to healthcare facilities.",
+        creator: "Dr. Jessica Walters",
+        date: "2024-05-16",
+      },
+      {
+        answer:
+          "It enhances accessibility to specialist care, especially for patients in remote areas, and can lead to improved disease control.",
+        creator: "Dr. Susan Patel",
+        date: "2024-05-16",
+      },
+    ],
+  },
+  {
+    question: "What are common side effects of antibiotics?",
+    date: "2024-05-15",
+    creator: "Dr. Maria Gonzalez",
+    answers: [
+      {
+        answer:
+          "Common side effects include nausea, diarrhea, and an increased risk of developing antibiotic-resistant bacteria.",
+        creator: "Dr. Tom Brady",
+        date: "2024-05-16",
+      },
+      {
+        answer:
+          "Some antibiotics can cause allergic reactions and sensitivity to sunlight.",
+        creator: "Dr. Anna Lee",
+        date: "2024-05-16",
+      },
+    ],
+  },
+  {
+    question: "How does personalized medicine impact treatment strategies?",
+    date: "2024-05-15",
+    creator: "Dr. Ravi Gupta",
+    answers: [
+      {
+        answer:
+          "Personalized medicine tailors treatment based on individual genetic profiles, leading to more effective and less toxic therapies.",
+        creator: "Dr. Linda Hart",
+        date: "2024-05-16",
+      },
+      {
+        answer:
+          "It helps in identifying the most effective medications and dosages, reducing trial and error in prescribing practices.",
+        creator: "Dr. Michael Cho",
+        date: "2024-05-16",
       },
     ],
   },
